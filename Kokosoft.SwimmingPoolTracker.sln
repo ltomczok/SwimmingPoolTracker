@@ -3,9 +3,26 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "API", "API", "{E977BD4C-5151-4B21-81CA-8F200D4DDEA2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kokosoft.SimmingPoolTracker.API", "Kokosoft.SimmingPoolTracker.API\Kokosoft.SimmingPoolTracker.API.csproj", "{49252D82-9410-47D8-9C89-3CA0EAF514D5}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{49252D82-9410-47D8-9C89-3CA0EAF514D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49252D82-9410-47D8-9C89-3CA0EAF514D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49252D82-9410-47D8-9C89-3CA0EAF514D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49252D82-9410-47D8-9C89-3CA0EAF514D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{49252D82-9410-47D8-9C89-3CA0EAF514D5} = {E977BD4C-5151-4B21-81CA-8F200D4DDEA2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5E480F9F-35F3-4DFE-9EA5-C68810C8A1D5}
