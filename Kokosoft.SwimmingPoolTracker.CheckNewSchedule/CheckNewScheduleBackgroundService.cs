@@ -24,18 +24,23 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
         private readonly IMongoClient mongoClient;
         private readonly ILogger<CheckNewScheduleBackgroundService> logger;
         private readonly IBus messageBus;
-
-        public CheckNewScheduleBackgroundService(IMonthHelpers monthHelper, MongoClient mongoClient, ILogger<CheckNewScheduleBackgroundService> logger, IBus messageBus)
+        private readonly IApplicationLifetime app;
+        public CheckNewScheduleBackgroundService(IMonthHelpers monthHelper, MongoClient mongoClient, ILogger<CheckNewScheduleBackgroundService> logger, IBus messageBus, IApplicationLifetime app)
         {
             this.monthHelper = monthHelper;
             this.mongoClient = mongoClient;
             this.logger = logger;
             this.messageBus = messageBus;
+            this.app = app;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            app.ApplicationStarted.Register(() => { logger.LogInformation("Host CheckNewSchedule started."); });
+            app.ApplicationStopping.Register(() => { logger.LogInformation("Host CheckNewSchedule stoping."); });
+            app.ApplicationStopped.Register(() => { logger.LogInformation("Host CheckNewSchedule stopped."); });
             await CheckNewSchedule();
+            app.StopApplication();
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -98,6 +103,7 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
 
         private async Task CheckNewSchedule()
         {
+            logger.LogInformation("Check if new schedule exists.");
             try
             {
                 var collectionName = "PoolSchedules";
@@ -122,7 +128,7 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
                         }
                         else
                         {
-                             // MongoDB stores dates in UTC, hosting machine timezone is set to UTC+1
+                            // MongoDB stores dates in UTC, hosting machine timezone is set to UTC+1
                             if (exist.ModificationDate.ToLocalTime() != parseResult.Schedule.ModificationDate)
                             {
                                 exist.ModificationDate = parseResult.Schedule.ModificationDate;

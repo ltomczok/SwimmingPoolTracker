@@ -29,7 +29,6 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
 
             try
             {
-                Log.Information("Starting service...");
                 var builder = new HostBuilder()
                     .ConfigureHostConfiguration(configHost =>
                     {
@@ -37,7 +36,7 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
                         configHost.AddCommandLine(args);
                     })
                     .ConfigureAppConfiguration((hostingContext, config) =>
-                    {
+                    {                        
                         config.AddJsonFile($"appsettings.json");
                         config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true);
                     })
@@ -52,14 +51,13 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
                     {
                         logging.AddSerilog();
                     })
-                    .UseConsoleLifetime();
+                    .Build();
 
-                await builder.RunConsoleAsync();
-                Log.Information("Stopping service");
+                await builder.RunAsync();
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Host terminated unexpectedly");
+                Log.Fatal(ex, "Host CheckNewSchedule terminated unexpectedly.");
             }
             finally
             {
