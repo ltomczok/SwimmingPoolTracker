@@ -5,8 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using EasyNetQ;
+using Kokosoft.SwimmingPoolTracker.ImportSchedule.Data;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -28,7 +30,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
             try
             {
-                Log.Information("Starting service...");
+                Log.Information("Starting service ImportSchedule");
                 var builder = new HostBuilder()
                 .ConfigureHostConfiguration(configHost =>
                 {
@@ -42,6 +44,8 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
+                    services.AddEntityFrameworkNpgsql();
+                    services.AddDbContext<PoolsContext>();
                     services.AddSingleton<IBus>(f => RabbitHutch.CreateBus(hostContext.Configuration.GetSection("RabbitMQ")["Host"]));
                     services.AddSingleton(new MongoClient(hostContext.Configuration.GetSection("MongoDB")["Host"]));
                     services.AddSingleton<IHostedService, OnNewSchedule>();
@@ -51,11 +55,11 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     logging.AddSerilog();
                 });
                 await builder.RunConsoleAsync();
-                Log.Information("Stopping service...");
+                Log.Information("Stopping service ImportSchedule");
             }
             catch (Exception ex)
             {
-                Log.Fatal(ex, "Host terminated unexpectedly");
+                Log.Fatal(ex, "Host ImportSchedule terminated unexpectedly");
             }
             finally
             {
