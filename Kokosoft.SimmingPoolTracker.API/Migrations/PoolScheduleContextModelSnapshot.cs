@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Kokosoft.SimmingPoolTracker.API.Migrations
 {
-    [DbContext(typeof(PoolScheduleContext))]
+    [DbContext(typeof(PoolsContext))]
     partial class PoolScheduleContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

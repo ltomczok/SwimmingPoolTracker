@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Kokosoft.SimmingPoolTracker.API.Migrations
 {
-    [DbContext(typeof(PoolScheduleContext))]
+    [DbContext(typeof(PoolsContext))]
     [Migration("20190221101825_Initial")]
     partial class Initial
     {

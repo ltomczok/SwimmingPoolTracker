@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Kokosoft.SimmingPoolTracker.API.Data
 {
-    public class PoolScheduleContext : DbContext
+    public class PoolsContext : DbContext
     {
         public DbSet<Pool> SwimmingPools { get; set; }
         public DbSet<Schedule> Schedules { get; set; }

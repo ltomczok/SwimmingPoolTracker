@@ -10,8 +10,8 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
 {
     public class ScheduleRepository : IScheduleRepository
     {
-        private PoolScheduleContext dc { get; }
-        public ScheduleRepository(PoolScheduleContext dc)
+        private PoolsContext dc { get; }
+        public ScheduleRepository(PoolsContext dc)
         {
             this.dc = dc;
         }

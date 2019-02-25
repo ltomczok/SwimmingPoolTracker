@@ -31,12 +31,12 @@ namespace Kokosoft.SimmingPoolTracker.API
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddEntityFrameworkNpgsql();
-            services.AddDbContext<PoolScheduleContext>();
+            services.AddDbContext<PoolsContext>();
             services.AddTransient<IScheduleRepository, ScheduleRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, PoolScheduleContext dc)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, PoolsContext dc)
         {
             dc.Database.Migrate();
 
