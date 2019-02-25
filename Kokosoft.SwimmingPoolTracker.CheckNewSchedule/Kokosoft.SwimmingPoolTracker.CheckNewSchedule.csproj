@@ -9,14 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="appsettings.docker.json" />
     <Content Remove="appsettings.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="appsettings.docker.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

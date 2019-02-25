@@ -36,7 +36,7 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
                         configHost.AddCommandLine(args);
                     })
                     .ConfigureAppConfiguration((hostingContext, config) =>
-                    {                        
+                    {
                         config.AddJsonFile($"appsettings.json");
                         config.AddJsonFile($"appsettings.{hostingContext.HostingEnvironment.EnvironmentName}.json", optional: true);
                     })
@@ -52,7 +52,6 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
                         logging.AddSerilog();
                     })
                     .Build();
-
                 await builder.RunAsync();
             }
             catch (Exception ex)
