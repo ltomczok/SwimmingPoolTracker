@@ -24,18 +24,18 @@ namespace Kokosoft.SimmingPoolTracker.API.Controllers
         private ILogger<PoolsController> logger { get; }
 
         // GET api/pools/5/schedule?date=2019-02-22&time=17:30
-        [HttpGet("{id}/schedule")]
-        public async Task<ActionResult<Schedule>> GetSchedule([FromRoute]int id, [FromQuery]DateTime date, string time)
+        [HttpGet("{pool}/schedule")]
+        public async Task<ActionResult<Schedule>> GetSchedule([FromRoute]string pool, [FromQuery]DateTime date, string time)
         {
             try
             {
-                //so far we omit the {id} parameter
+                //so far we omit the {pool} parameter
                 Schedule schedule = await repo.GetSchedule(date, time);
                 return schedule;
             }
             catch (Exception ex)
             {
-                logger.LogError($"Error during getting schedule of swimming pool {id}.", ex);
+                logger.LogError($"Error during getting schedule of swimming pool {pool}.", ex);
             }
             return BadRequest();
         }

@@ -12,7 +12,23 @@ namespace Kokosoft.SimmingPoolTracker.API.Data
         public DbSet<Pool> SwimmingPools { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseNpgsql("Host=localhost;Database=pools;Username=postgres;Password=1234");
+        public PoolsContext()
+        {
+        }
+
+        public PoolsContext(DbContextOptions<PoolsContext> options) : base(options)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Schedule>()
+                .Property(p => p.Time).HasMaxLength(5);
+
+            modelBuilder.Entity<Schedule>()
+                .HasAlternateKey(a => new { a.Day, a.Time });
+
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

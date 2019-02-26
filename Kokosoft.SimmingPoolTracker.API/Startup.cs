@@ -31,7 +31,7 @@ namespace Kokosoft.SimmingPoolTracker.API
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddEntityFrameworkNpgsql();
-            services.AddDbContext<PoolsContext>();
+            services.AddDbContext<PoolsContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("PoolsContext")));
             services.AddTransient<IScheduleRepository, ScheduleRepository>();
         }
 

@@ -3,15 +3,17 @@ using System;
 using Kokosoft.SimmingPoolTracker.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Kokosoft.SimmingPoolTracker.API.Migrations
 {
     [DbContext(typeof(PoolsContext))]
-    partial class PoolScheduleContextModelSnapshot : ModelSnapshot
+    [Migration("20190226131349_schedule_alternatekey")]
+    partial class schedule_alternatekey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,8 +45,7 @@ namespace Kokosoft.SimmingPoolTracker.API.Migrations
                     b.Property<int?>("PoolId");
 
                     b.Property<string>("Time")
-                        .IsRequired()
-                        .HasMaxLength(5);
+                        .IsRequired();
 
                     b.Property<int>("Track25");
 
