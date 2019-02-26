@@ -148,8 +148,9 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
         private async Task SendNotification(string loggerInformation, PoolSchedule poolSchedule)
         {
             logger.LogInformation($"{loggerInformation}. Id: {poolSchedule.Id}");
-            var message = new NewSchedulle
+            var message = new NewSchedule
             {
+                Pool = Pools.Olimpijczyk,
                 Id = poolSchedule.Id,
                 Link = poolSchedule.Link,
                 ModificationDate = poolSchedule.ModificationDate,
@@ -161,7 +162,7 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
                 YearTo = poolSchedule.YearTo
             };
 
-            await messageBus.SendAsync<NewSchedulle>("swimmingpooltracker", message);
+            await messageBus.SendAsync<NewSchedule>("swimmingpooltracker", message);
         }
 
         private void GetValuesFromDateString(string dateString, PoolSchedule poolSchedule, DateType dateType)

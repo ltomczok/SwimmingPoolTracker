@@ -31,7 +31,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
-           messageBus.Receive<NewSchedulle>("swimmingpooltracker", message => OnNewMessage(message));
+           messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
            return Task.CompletedTask;
         }
 
@@ -41,16 +41,16 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             return Task.CompletedTask;
         }
 
-        public async Task OnNewMessage(NewSchedulle newSchedulle)
+        public async Task OnNewMessage(NewSchedule newSchedule)
         {
             try
             {
-                logger.LogInformation($"New schedule: {newSchedulle.Link}");
-                string fileName = newSchedulle.Link.Substring(newSchedulle.Link.LastIndexOf('/') + 1, (newSchedulle.Link.Length - newSchedulle.Link.LastIndexOf('/')) - 1);
-                bool fileDownloaded = await DownloadFile(newSchedulle.Link, fileName);
+                logger.LogInformation($"New schedule: {newSchedule.Link}");
+                string fileName = newSchedule.Link.Substring(newSchedule.Link.LastIndexOf('/') + 1, (newSchedule.Link.Length - newSchedule.Link.LastIndexOf('/')) - 1);
+                bool fileDownloaded = await DownloadFile(newSchedule.Link, fileName);
                 if (fileDownloaded)
                 {
-                    bool fileLoaded = await LoadSchedulle(newSchedulle, fileName);
+                    bool fileLoaded = await LoadSchedulle(newSchedule, fileName);
                 }
             }
             catch (Exception ex)
@@ -59,11 +59,11 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             }
         }
 
-        public async Task<bool> LoadSchedulle(NewSchedulle newSchedulle, string fileName)
+        public async Task<bool> LoadSchedulle(NewSchedule newSchedule, string fileName)
         {
             List<Schedule> poolSchedules = new List<Schedule>();
-            DateTime startDate = new DateTime(newSchedulle.YearFrom, newSchedulle.MonthFrom, newSchedulle.DayFrom);
-            DateTime endDate = new DateTime(newSchedulle.YearTo, newSchedulle.MonthTo, newSchedulle.DayTo);
+            DateTime startDate = new DateTime(newSchedule.YearFrom, newSchedule.MonthFrom, newSchedule.DayFrom);
+            DateTime endDate = new DateTime(newSchedule.YearTo, newSchedule.MonthTo, newSchedule.DayTo);
             double itterations = ((endDate - startDate).Days) + 1;
             //Load the PDF document.
             FileStream docStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
