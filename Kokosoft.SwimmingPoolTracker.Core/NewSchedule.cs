@@ -2,8 +2,9 @@ using System;
 
 namespace Kokosoft.SwimmingPoolTracker.Core
 {
-    public class NewSchedulle
+    public class NewSchedule
     {
+        public Pools Pool { get; set; }
         public string Id { get; set; }
         public int DayFrom { get; set; }
         public int DayTo { get; set; }
