@@ -23,11 +23,14 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
         private readonly ILogger<OnNewSchedule> logger;
         private readonly MongoClient mongoClient;
 
-        public OnNewSchedule(IBus bus, ILogger<OnNewSchedule> logger, MongoClient mongoClient)
+        public PoolsContext Dc { get; }
+
+        public OnNewSchedule(IBus bus, ILogger<OnNewSchedule> logger, MongoClient mongoClient, PoolsContext dc)
         {
             messageBus = bus;
             this.logger = logger;
             this.mongoClient = mongoClient;
+            Dc = dc;
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
@@ -150,9 +153,8 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                 }
             }
             poolSchedule.RemoveAll(c => c.IsEmpty);
-            PoolsContext dc = new PoolsContext();
-            await dc.Schedules.AddRangeAsync(poolSchedule);
-            await dc.SaveChangesAsync();
+            await Dc.Schedules.AddRangeAsync(poolSchedule);
+            await Dc.SaveChangesAsync();
             return true;
         }
 
