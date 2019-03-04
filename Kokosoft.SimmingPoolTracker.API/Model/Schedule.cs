@@ -10,9 +10,7 @@ namespace Kokosoft.SimmingPoolTracker.API.Model
         public int Id { get; set; }
         public DateTime Day { get; set; }
         public string Time { get; set; }
-        public int Track50 { get; set; }
-        public int Track25 { get; set; }
-        public int TrackShallow { get; set; }
+        public List<string> Tracks { get; set; }
         public Pool Pool { get; set; }
     }
 }

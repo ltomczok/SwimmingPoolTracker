@@ -22,20 +22,20 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
         IBus messageBus;
         private readonly ILogger<OnNewSchedule> logger;
         private readonly MongoClient mongoClient;
+        private readonly IServiceProvider services;
 
-        public PoolsContext Dc { get; }
-
-        public OnNewSchedule(IBus bus, ILogger<OnNewSchedule> logger, MongoClient mongoClient, PoolsContext dc)
+        public OnNewSchedule(IBus bus, ILogger<OnNewSchedule> logger, MongoClient mongoClient, IServiceProvider services)
         {
             messageBus = bus;
             this.logger = logger;
             this.mongoClient = mongoClient;
-            Dc = dc;
+            this.services = services;
         }
+
         public Task StartAsync(CancellationToken cancellationToken)
         {
-           messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
-           return Task.CompletedTask;
+            messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
+            return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -131,30 +131,18 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     string[] s = pdfList[current + j].Split(',', 'i');
                     foreach (var item in s)
                     {
-                        if (item.Trim() == "wypł")
-                        {
-                            schedule.GetType().GetProperty("TrackShallow").SetValue(schedule, 1);
-                        }
-                        if (item.Contains('x'))
-                        {
-                            string[] track = item.Split('x');
-
-                            if (track[1].Trim() == "50m")
-                            {
-                                schedule.GetType().GetProperty("Track50").SetValue(schedule, int.Parse(track[0]));
-                            }
-                            if (track[1].Trim() == "25m")
-                            {
-                                schedule.GetType().GetProperty("Track25").SetValue(schedule, int.Parse(track[0]));
-                            }
-                        }
+                        schedule.Tracks.Add(item.Trim());
                     }
                     date = date.AddDays(1);
                 }
             }
             poolSchedule.RemoveAll(c => c.IsEmpty);
-            await Dc.Schedules.AddRangeAsync(poolSchedule);
-            await Dc.SaveChangesAsync();
+
+            using (PoolsContext dc = this.services.GetService(typeof(PoolsContext)) as PoolsContext)
+            {
+                await dc.Schedules.AddRangeAsync(poolSchedule);
+                await dc.SaveChangesAsync();
+            }
             return true;
         }
 
