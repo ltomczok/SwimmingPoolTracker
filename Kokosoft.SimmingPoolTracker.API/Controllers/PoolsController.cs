@@ -40,13 +40,13 @@ namespace Kokosoft.SimmingPoolTracker.API.Controllers
             return BadRequest();
         }
 
-        // GET api/pools/5/schedule?date=2019-02-22&time=17:30
+        // GET api/pools
         [HttpGet]
         public ActionResult<int> GetVersion()
         {
             try
             {
-                return 1;
+                return 2;
             }
             catch (Exception ex)
             {
