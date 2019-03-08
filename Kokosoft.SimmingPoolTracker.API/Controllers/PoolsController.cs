@@ -39,5 +39,20 @@ namespace Kokosoft.SimmingPoolTracker.API.Controllers
             }
             return BadRequest();
         }
+
+        // GET api/pools/5/schedule?date=2019-02-22&time=17:30
+        [HttpGet]
+        public ActionResult<int> GetVersion()
+        {
+            try
+            {
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Error during getting version.", ex);
+            }
+            return BadRequest();
+        }
     }
 }
