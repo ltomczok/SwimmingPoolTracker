@@ -5,11 +5,8 @@ using System.Threading.Tasks;
 
 namespace Kokosoft.SimmingPoolTracker.API.Model
 {
-    public class Pool
+    public class Address
     {
         public int Id { get; set; }
-        public string ShortName { get; set; }
-        public string Name { get; set; }
-        public Address Address { get; set; }
     }
 }
