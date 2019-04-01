@@ -16,9 +16,9 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
             this.dc = dc;
         }
 
-        public async Task<Schedule> GetSchedule(DateTime date, string time)
-        {
-            Schedule schedule = await dc.Schedules.Where(s => s.Day == date && s.Time == time).SingleOrDefaultAsync();
+        public async Task<List<Schedule>> GetSchedule(DateTime date)
+        {           
+            List<Schedule> schedule = await dc.Schedules.Where(s => s.Day == date).ToListAsync();
             return schedule;
         }    
     }

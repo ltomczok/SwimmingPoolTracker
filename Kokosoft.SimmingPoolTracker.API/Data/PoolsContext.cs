@@ -23,10 +23,13 @@ namespace Kokosoft.SimmingPoolTracker.API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Schedule>()
-                .Property(p => p.Time).HasMaxLength(5);
+                .Property(p => p.StartTime).HasMaxLength(5);
 
             modelBuilder.Entity<Schedule>()
-                .HasAlternateKey(a => new { a.Day, a.Time });
+                .Property(p => p.EndTime).HasMaxLength(5);
+
+            modelBuilder.Entity<Schedule>()
+                .HasAlternateKey(a => new { a.Day, a.StartTime });
 
             base.OnModelCreating(modelBuilder);
         }

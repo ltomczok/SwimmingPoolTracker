@@ -8,6 +8,6 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
 {
     public interface IScheduleRepository
     {
-        Task<Schedule> GetSchedule(DateTime date, string time);
+        Task<List<Schedule>> GetSchedule(DateTime date);
     }
 }

@@ -34,7 +34,26 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
+            try
+            {
+                LoadSchedulle(new NewSchedule()
+                {
+                    Link = "https://mzuk.gliwice.pl/wp-content/uploads/2019/03/niecka-od-25-do-31-marca-2019.pdf",
+                    DayFrom = 25,
+                    MonthFrom = 3,
+                    YearFrom = 2019,
+                    DayTo = 31,
+                    MonthTo = 3,
+                    YearTo = 2019
+                }, "niecka-od-25-do-31-marca-2019.pdf");
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+            //messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
             return Task.CompletedTask;
         }
 
@@ -62,12 +81,9 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             }
         }
 
-        public async Task<bool> LoadSchedulle(NewSchedule newSchedule, string fileName)
+        public List<string> LoadDocument(string fileName)
         {
-            List<Schedule> poolSchedules = new List<Schedule>();
-            DateTime startDate = new DateTime(newSchedule.YearFrom, newSchedule.MonthFrom, newSchedule.DayFrom);
-            DateTime endDate = new DateTime(newSchedule.YearTo, newSchedule.MonthTo, newSchedule.DayTo);
-            double itterations = ((endDate - startDate).Days) + 1;
+            List<string> parsedSchedule = new List<string>();
             //Load the PDF document.
             FileStream docStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
 
@@ -87,30 +103,31 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             //Close the document.
             loadedDocument.Close(true);
             docStream.Close();
-            List<Schedule> poolSchedule = new List<Schedule>();
-            List<string> pdfList = new List<string>();
-            pdfList.AddRange(extractedText.Split("\r\n"));
-            List<int> schedulers = new List<int>();
-            for (int i = 0; i < pdfList.Count(); i++)
-            {
-                string time = pdfList[i];
+            parsedSchedule.AddRange(extractedText.Split("\r\n"));
 
-                if (IsValidTimeFormat(time))
-                {
-                    schedulers.Add(i);
-                }
+            return parsedSchedule;
+        }
 
-            }
-            for (int i = 0; i < schedulers.Count; i++)
+        public async Task<bool> LoadSchedulle(NewSchedule newSchedule, string fileName)
+        {
+            List<Schedule> scheduleList = new List<Schedule>();
+            DateTime startDate = new DateTime(newSchedule.YearFrom, newSchedule.MonthFrom, newSchedule.DayFrom);
+            DateTime endDate = new DateTime(newSchedule.YearTo, newSchedule.MonthTo, newSchedule.DayTo);
+            double itterations = ((endDate - startDate).Days) + 1;
+
+            List<string> parsedSchedule = LoadDocument(fileName);
+            List<int> hours = LoadHours(parsedSchedule); new List<int>();
+
+            for (int i = 0; i < hours.Count; i++)
             {
                 DateTime date = startDate;
 
-                int current = schedulers[i];
+                int current = hours[i];
                 int next;
                 int iterations = 7;
-                if (current != schedulers.Last())
+                if (current != hours.Last())
                 {
-                    next = schedulers[i + 1];
+                    next = hours[i + 1];
                     if ((next - current - 1) < 7)
                     {
                         iterations = next - current - 1;
@@ -118,32 +135,80 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                 }
                 else
                 {
-                    iterations = (pdfList.Count - current) - 1;
+                    iterations = (parsedSchedule.Count - current) - 1;
                 }
 
 
                 for (int j = 1; j <= iterations; j++)
                 {
                     Schedule schedule = new Schedule();
-                    poolSchedule.Add(schedule);
-                    schedule.Time = pdfList[current];
+                    scheduleList.Add(schedule);
+                    schedule.StartTime = parsedSchedule[current];
                     schedule.Day = date;
-                    string[] s = pdfList[current + j].Split(',', 'i');
-                    foreach (var item in s)
-                    {
-                        schedule.Tracks.Add(item.Trim());
-                    }
+                    schedule.Tracks = parsedSchedule[current + j].Split(',', 'i').Select(x => x.Trim()).ToList();
                     date = date.AddDays(1);
                 }
             }
-            poolSchedule.RemoveAll(c => c.IsEmpty);
 
-            using (PoolsContext dc = this.services.GetService(typeof(PoolsContext)) as PoolsContext)
+            var mergedSchedules = MergeSchedule(scheduleList);
+            try
             {
-                await dc.Schedules.AddRangeAsync(poolSchedule);
-                await dc.SaveChangesAsync();
+
+                using (PoolsContext dc = this.services.GetService(typeof(PoolsContext)) as PoolsContext)
+                {
+                    await dc.Schedules.AddRangeAsync(mergedSchedules);
+                    await dc.SaveChangesAsync();
+                }
+
+            }
+            catch (Exception ex)
+            {
+
+                throw;
             }
             return true;
+        }
+
+        private List<int> LoadHours(List<string> parsedSchedule)
+        {
+            List<int> hours = new List<int>();
+            for (int i = 0; i < parsedSchedule.Count(); i++)
+            {
+                string time = parsedSchedule[i];
+
+                if (IsValidTimeFormat(time))
+                {
+                    hours.Add(i);
+                }
+            }
+            return hours;
+        }
+
+        private List<Schedule> MergeSchedule(List<Schedule> poolSchedule)
+        {
+            List<Schedule> mergedSchedules = new List<Schedule>();
+            poolSchedule.RemoveAll(c => c.IsEmpty);
+            Schedule mergedSchedule = null;
+            foreach (Schedule schedule in poolSchedule.OrderBy(p => p.Day).ThenBy(p => p.StartTime))
+            {
+                if (mergedSchedule != null)
+                {
+                    if (!mergedSchedules.Contains(mergedSchedule))
+                    {
+                        mergedSchedules.Add(mergedSchedule);
+                    }
+                    mergedSchedule.EndTime = schedule.StartTime;
+                    if (mergedSchedule.Day != schedule.Day || !mergedSchedule.Tracks.SequenceEqual(schedule.Tracks))
+                    {
+                        mergedSchedule = new Schedule() { Day = schedule.Day, StartTime = schedule.StartTime, Tracks = new List<string>(schedule.Tracks), Pool = schedule.Pool };
+                    }
+                }
+                else
+                {
+                    mergedSchedule = new Schedule() { Day = schedule.Day, StartTime = schedule.StartTime, Tracks = new List<string>(schedule.Tracks), Pool = schedule.Pool };
+                }
+            }
+            return mergedSchedules;
         }
 
         public bool IsValidTimeFormat(string input)
