@@ -1,4 +1,5 @@
 using Kokosoft.SimmingPoolTracker.API.Model;
+using Kokosoft.SimmingPoolTracker.API.Model.Dto;
 using Kokosoft.SimmingPoolTracker.API.Repository;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,34 +24,51 @@ namespace Kokosoft.SimmingPoolTracker.API.Controllers
         private IScheduleRepository repo { get; }
         private ILogger<PoolsController> logger { get; }
 
-        // GET api/pools/5/schedule?date=2019-02-22&time=17:30
-        [HttpGet("{pool}/schedule")]
-        public async Task<ActionResult<List<Schedule>>> GetSchedule([FromRoute]string pool, [FromQuery]DateTime date)
+        // GET api/pools/olimpijczyk/occupancy?date=2019-02-22&time=17:30
+        [HttpGet("{pool}/occupancy")]
+        public async Task<ActionResult<Occupancy>> GetOccupancy([FromRoute]string pool, [FromQuery]DateTime date, string time)
         {
             try
             {
-                //so far we omit the {pool} parameter
-                List<Schedule> schedule = await repo.GetSchedule(date);
-                return schedule;
+                //for now we omit the {pool} parameter
+                Occupancy occupancy = await repo.GetOccupancy(date, time);
+                return occupancy;
             }
             catch (Exception ex)
             {
-                logger.LogError($"Error during getting schedule of swimming pool {pool}.", ex);
+                logger.LogError($"Error during getting occupancy of swimming pool {pool}.", ex);
+            }
+            return BadRequest();
+        }
+
+        // GET api/pools/olimpijczyk/lastoccupancy
+        [HttpGet("{pool}/lastoccupancy")]
+        public async Task<ActionResult<Occupancy>> GetLastOccupancy([FromRoute]string pool)
+        {
+            try
+            {
+                //for now we omit the {pool} parameter
+                Occupancy occupancy = await repo.GetLastOccupancy();
+                return occupancy;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Error during getting last occupancy of swimming pool {pool}.", ex);
             }
             return BadRequest();
         }
 
         // GET api/pools
         [HttpGet]
-        public ActionResult<int> GetVersion()
+        public ActionResult<string> GetPools()
         {
             try
             {
-                return 2;
+                return "olimpijczyk";
             }
             catch (Exception ex)
             {
-                logger.LogError($"Error during getting version.", ex);
+                logger.LogError($"Error during getting pools list.", ex);
             }
             return BadRequest();
         }

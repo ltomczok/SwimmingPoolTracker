@@ -1,5 +1,6 @@
 using Kokosoft.SimmingPoolTracker.API.Data;
 using Kokosoft.SimmingPoolTracker.API.Model;
+using Kokosoft.SimmingPoolTracker.API.Model.Dto;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -16,10 +17,37 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
             this.dc = dc;
         }
 
-        public async Task<List<Schedule>> GetSchedule(DateTime date)
-        {           
-            List<Schedule> schedule = await dc.Schedules.Where(s => s.Day == date).ToListAsync();
-            return schedule;
-        }    
+        public async Task<Occupancy> GetOccupancy(DateTime date, string time)
+        {
+            Occupancy occupancy = new Occupancy(date);
+
+            List<Model.Schedule> schedules = await dc.Schedules.Where(s => s.Day == date).ToListAsync();
+            if (schedules.Count > 0)
+            {
+                TimeSpan startTime = ConvertTime(time);
+
+                schedules.Where(s => (startTime >= ConvertTime(s.StartTime) && startTime <= ConvertTime(s.EndTime)))
+                    .ToList()
+                    .ForEach(s => occupancy.AddSchedule(s.StartTime, s.EndTime, s.Tracks));
+            }
+            return occupancy;
+        }
+
+        public async Task<Occupancy> GetLastOccupancy()
+        {
+            Model.Schedule lastSchedule = await dc.Schedules.OrderByDescending(s => s.Day).FirstOrDefaultAsync();
+            Occupancy lastOccupancy = new Occupancy(lastSchedule.Day);
+            return lastOccupancy;
+        }
+
+        public TimeSpan ConvertTime(string timeString)
+        {
+            string[] hoursMinutes = timeString.Split(':');
+            int hour = int.Parse(hoursMinutes[0]);
+            int minutes = int.Parse(hoursMinutes[1]);
+
+            return new TimeSpan(hour, minutes, 0);
+        }
+
     }
 }

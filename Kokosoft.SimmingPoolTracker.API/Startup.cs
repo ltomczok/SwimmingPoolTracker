@@ -33,11 +33,14 @@ namespace Kokosoft.SimmingPoolTracker.API
             services.AddEntityFrameworkNpgsql();
             services.AddDbContext<PoolsContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("PoolsContext")));
             services.AddTransient<IScheduleRepository, ScheduleRepository>();
+            // Register the Swagger services
+            services.AddSwaggerDocument();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, Data.PoolsContext dc)
         {
+            dc.Database.Migrate();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -54,6 +57,11 @@ namespace Kokosoft.SimmingPoolTracker.API
             }
 
             //app.UseHttpsRedirection();
+
+            // Register the Swagger generator and the Swagger UI middlewares
+            app.UseSwagger();
+            app.UseSwaggerUi3();
+
             app.UseMvc();
         }
     }
