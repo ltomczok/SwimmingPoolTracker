@@ -34,26 +34,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            try
-            {
-                LoadSchedulle(new NewSchedule()
-                {
-                    Link = "https://mzuk.gliwice.pl/wp-content/uploads/2019/03/niecka-od-25-do-31-marca-2019.pdf",
-                    DayFrom = 25,
-                    MonthFrom = 3,
-                    YearFrom = 2019,
-                    DayTo = 31,
-                    MonthTo = 3,
-                    YearTo = 2019
-                }, "niecka-od-25-do-31-marca-2019.pdf");
-
-            }
-            catch (Exception ex)
-            {
-
-                throw;
-            }
-            //messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
+            messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
             return Task.CompletedTask;
         }
 
@@ -145,7 +126,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     scheduleList.Add(schedule);
                     schedule.StartTime = parsedSchedule[current];
                     schedule.Day = date;
-                    schedule.Tracks = parsedSchedule[current + j].Split(',', 'i').Select(x => x.Trim()).ToList();
+                    schedule.Tracks = parsedSchedule[current + j].Split(',', 'i').Select(x => x.Trim().Replace("m", string.Empty).Replace("wypł", "shallow")).ToList();
                     date = date.AddDays(1);
                 }
             }
