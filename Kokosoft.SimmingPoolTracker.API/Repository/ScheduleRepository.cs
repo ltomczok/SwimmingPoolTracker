@@ -26,7 +26,8 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
             {
                 TimeSpan startTime = ConvertTime(time);
 
-                schedules.Where(s => (startTime >= ConvertTime(s.StartTime) && startTime <= ConvertTime(s.EndTime)))
+                schedules.Where(s => (ConvertTime(s.StartTime) >= startTime))
+                    .OrderBy(s => s.StartTime)
                     .ToList()
                     .ForEach(s => occupancy.AddSchedule(s.StartTime, s.EndTime, s.Tracks));
             }
