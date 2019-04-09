@@ -10,6 +10,7 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
     public interface IScheduleRepository
     {
         Task<Occupancy> GetOccupancy(DateTime date, string time);
+        Task<Occupancy> GetOccupancy(DateTime date);
         Task<Occupancy> GetLastOccupancy();
     }
 }

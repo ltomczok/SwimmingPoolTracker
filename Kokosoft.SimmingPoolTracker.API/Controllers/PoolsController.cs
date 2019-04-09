@@ -30,8 +30,16 @@ namespace Kokosoft.SimmingPoolTracker.API.Controllers
         {
             try
             {
-                //for now we omit the {pool} parameter
-                Occupancy occupancy = await repo.GetOccupancy(date, time);
+                Occupancy occupancy = null;
+                if (HttpContext.Request.Query.ContainsKey("time"))
+                {
+                    //for now we omit the {pool} parameter
+                     occupancy = await repo.GetOccupancy(date, time);
+                }
+                else
+                {
+                    occupancy = await repo.GetOccupancy(date);
+                }
                 return occupancy;
             }
             catch (Exception ex)

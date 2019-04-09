@@ -17,6 +17,24 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
             this.dc = dc;
         }
 
+        public async Task<Occupancy> GetOccupancy(DateTime date)
+        {
+            Occupancy occupancy = new Occupancy(date);
+
+            List<Model.Schedule> schedules = await dc.Schedules.Where(s => s.Day == date).ToListAsync();
+            if (schedules.Count > 0)
+            {
+                schedules.OrderBy(s => s.StartTime)
+                    .ToList()
+                    .ForEach(s => occupancy.AddSchedule(s.StartTime, s.EndTime, s.Tracks));
+            }
+            if (occupancy.Schedules.Count > 0)
+            {
+                return occupancy;
+            }
+            return null;
+        }
+
         public async Task<Occupancy> GetOccupancy(DateTime date, string time)
         {
             Occupancy occupancy = new Occupancy(date);
@@ -24,14 +42,18 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
             List<Model.Schedule> schedules = await dc.Schedules.Where(s => s.Day == date).ToListAsync();
             if (schedules.Count > 0)
             {
-                TimeSpan startTime = TimeSpan.Parse(time);
+                TimeSpan getTime = TimeSpan.Parse(time);
 
-                schedules.Where(s => (TimeSpan.Parse(s.StartTime) >= startTime))
+                schedules.Where(s => (getTime <= TimeSpan.Parse(s.EndTime)))
                     .OrderBy(s => s.StartTime)
                     .ToList()
                     .ForEach(s => occupancy.AddSchedule(s.StartTime, s.EndTime, s.Tracks));
             }
-            return occupancy;
+            if (occupancy.Schedules.Count > 0)
+            {
+                return occupancy;
+            }
+            return null;
         }
 
         public async Task<Occupancy> GetLastOccupancy()
@@ -39,6 +61,6 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
             Model.Schedule lastSchedule = await dc.Schedules.OrderByDescending(s => s.Day).FirstOrDefaultAsync();
             Occupancy lastOccupancy = new Occupancy(lastSchedule.Day);
             return lastOccupancy;
-        }        
+        }
     }
 }
