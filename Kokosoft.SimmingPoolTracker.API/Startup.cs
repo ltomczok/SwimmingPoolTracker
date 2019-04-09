@@ -29,6 +29,13 @@ namespace Kokosoft.SimmingPoolTracker.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            }));
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddEntityFrameworkNpgsql();
             services.AddDbContext<PoolsContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("PoolsContext")));
@@ -41,6 +48,9 @@ namespace Kokosoft.SimmingPoolTracker.API
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, Data.PoolsContext dc)
         {
             dc.Database.Migrate();
+
+            app.UseCors("AllowAllPolicy");
+
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -55,9 +65,7 @@ namespace Kokosoft.SimmingPoolTracker.API
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
-            //app.UseHttpsRedirection();
-
+           
             // Register the Swagger generator and the Swagger UI middlewares
             app.UseSwagger();
             app.UseSwaggerUi3();
