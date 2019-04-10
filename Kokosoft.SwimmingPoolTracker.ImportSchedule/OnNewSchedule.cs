@@ -91,6 +91,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
         public async Task<bool> LoadSchedulle(NewSchedule newSchedule, string fileName)
         {
+            string endOfDay = string.Empty;
             List<Schedule> scheduleList = new List<Schedule>();
             DateTime startDate = new DateTime(newSchedule.YearFrom, newSchedule.MonthFrom, newSchedule.DayFrom);
             DateTime endDate = new DateTime(newSchedule.YearTo, newSchedule.MonthTo, newSchedule.DayTo);
@@ -126,7 +127,14 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     scheduleList.Add(schedule);
                     schedule.StartTime = parsedSchedule[current];
                     schedule.Day = date;
-                    schedule.Tracks = parsedSchedule[current + j].Split(',', 'i').Select(x => x.Trim().Replace("m", string.Empty).Replace("wypł", "shallow")).ToList();
+                    if (parsedSchedule[current + j].Contains("x") || parsedSchedule[current + j].Contains("wypł") || parsedSchedule[current + j].Equals("0"))
+                    {
+                        schedule.Tracks = parsedSchedule[current + j].Split(',', 'i').Select(x => x.Trim().Replace("m", string.Empty).Replace("wypł", "shallow")).ToList();
+                    }
+                    else
+                    {
+                        var aaa = 1;
+                    }
                     date = date.AddDays(1);
                 }
             }
@@ -144,14 +152,15 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             }
             catch (Exception ex)
             {
-
                 throw;
             }
             return true;
         }
 
+        string endOfDay = string.Empty;
         private List<int> LoadHours(List<string> parsedSchedule)
         {
+            string lastHour = "00:00";
             List<int> hours = new List<int>();
             for (int i = 0; i < parsedSchedule.Count(); i++)
             {
@@ -159,9 +168,14 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
                 if (IsValidTimeFormat(time))
                 {
+                    if (TimeSpan.Parse(time) > TimeSpan.Parse(lastHour))
+                    {
+                        lastHour = time;
+                    }
                     hours.Add(i);
                 }
             }
+            endOfDay = lastHour;
             return hours;
         }
 
@@ -178,7 +192,14 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     {
                         mergedSchedules.Add(mergedSchedule);
                     }
+
                     mergedSchedule.EndTime = schedule.StartTime;
+
+                    if (TimeSpan.Parse(mergedSchedule.EndTime) < TimeSpan.Parse(mergedSchedule.StartTime))
+                    {
+                        mergedSchedule.EndTime = endOfDay;
+                    }
+
                     if (mergedSchedule.Day != schedule.Day || !mergedSchedule.Tracks.SequenceEqual(schedule.Tracks))
                     {
                         mergedSchedule = new Schedule() { Day = schedule.Day, StartTime = schedule.StartTime, Tracks = new List<string>(schedule.Tracks), Pool = schedule.Pool };
@@ -189,6 +210,12 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     mergedSchedule = new Schedule() { Day = schedule.Day, StartTime = schedule.StartTime, Tracks = new List<string>(schedule.Tracks), Pool = schedule.Pool };
                 }
             }
+
+            if (TimeSpan.Parse(mergedSchedules.Last().EndTime) < TimeSpan.Parse(endOfDay))
+            {
+                mergedSchedules.Last().EndTime = endOfDay;
+            }
+
             return mergedSchedules;
         }
 
