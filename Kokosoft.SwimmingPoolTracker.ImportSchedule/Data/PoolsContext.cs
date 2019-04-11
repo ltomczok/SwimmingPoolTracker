@@ -24,6 +24,8 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Pool>().HasKey(p => p.ShortName);
+
             modelBuilder.Entity<Schedule>()
                 .Property(p => p.StartTime).HasMaxLength(5);
 

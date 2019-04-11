@@ -17,6 +17,16 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
             this.dc = dc;
         }
 
+        public async Task<List<Pool>> GetPools()
+        {
+            return await dc.SwimmingPools.ToListAsync();
+        }
+
+        public async Task<Pool> GetPool(string poolId)
+        {
+            return await dc.SwimmingPools.Where(p => p.ShortName == poolId).SingleOrDefaultAsync();
+        }
+
         public async Task<Occupancy> GetOccupancy(DateTime date)
         {
             Occupancy occupancy = new Occupancy(date);

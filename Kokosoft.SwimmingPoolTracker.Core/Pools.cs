@@ -6,8 +6,8 @@ namespace Kokosoft.SwimmingPoolTracker.Core
 {
     public enum Pools
     {
-        Olimpijczyk,
-        Delfin,
-        Mewa
+        olimpijczyk,
+        delfin,
+        mewa
     }
 }

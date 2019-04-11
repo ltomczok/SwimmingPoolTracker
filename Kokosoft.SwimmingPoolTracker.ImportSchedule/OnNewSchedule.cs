@@ -2,6 +2,7 @@ using EasyNetQ;
 using Kokosoft.SwimmingPoolTracker.Core;
 using Kokosoft.SwimmingPoolTracker.ImportSchedule.Data;
 using Kokosoft.SwimmingPoolTracker.ImportSchedule.Model;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
@@ -19,6 +20,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 {
     public class OnNewSchedule : IHostedService
     {
+        string endOfDay = string.Empty;
         IBus messageBus;
         private readonly ILogger<OnNewSchedule> logger;
         private readonly MongoClient mongoClient;
@@ -58,7 +60,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "");
+                logger.LogError(ex, "Error during import of schedule.");
             }
         }
 
@@ -91,76 +93,75 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
         public async Task<bool> LoadSchedulle(NewSchedule newSchedule, string fileName)
         {
-            string endOfDay = string.Empty;
-            List<Schedule> scheduleList = new List<Schedule>();
-            DateTime startDate = new DateTime(newSchedule.YearFrom, newSchedule.MonthFrom, newSchedule.DayFrom);
-            DateTime endDate = new DateTime(newSchedule.YearTo, newSchedule.MonthTo, newSchedule.DayTo);
-            double itterations = ((endDate - startDate).Days) + 1;
-
-            List<string> parsedSchedule = LoadDocument(fileName);
-            List<int> hours = LoadHours(parsedSchedule); new List<int>();
-
-            for (int i = 0; i < hours.Count; i++)
+            PoolsContext dc = null;
+            try
             {
-                DateTime date = startDate;
+                dc = this.services.GetService(typeof(PoolsContext)) as PoolsContext;
+                Pool pool = await dc.SwimmingPools.Where(p => p.ShortName == newSchedule.Pool.ToString()).SingleOrDefaultAsync();
+                endOfDay = pool.ExitTime;
 
-                int current = hours[i];
-                int next;
-                int iterations = 7;
-                if (current != hours.Last())
+                List<Schedule> scheduleList = new List<Schedule>();
+                DateTime startDate = new DateTime(newSchedule.YearFrom, newSchedule.MonthFrom, newSchedule.DayFrom);
+                DateTime endDate = new DateTime(newSchedule.YearTo, newSchedule.MonthTo, newSchedule.DayTo);
+                double itterations = ((endDate - startDate).Days) + 1;
+
+                List<string> parsedSchedule = LoadDocument(fileName);
+                List<int> hours = LoadHours(parsedSchedule); new List<int>();
+
+                for (int i = 0; i < hours.Count; i++)
                 {
-                    next = hours[i + 1];
-                    if ((next - current - 1) < 7)
+                    DateTime date = startDate;
+
+                    int current = hours[i];
+                    int next;
+                    int iterations = 7;
+                    if (current != hours.Last())
                     {
-                        iterations = next - current - 1;
-                    }
-                }
-                else
-                {
-                    iterations = (parsedSchedule.Count - current) - 1;
-                }
-
-
-                for (int j = 1; j <= iterations; j++)
-                {
-                    Schedule schedule = new Schedule();
-                    scheduleList.Add(schedule);
-                    schedule.StartTime = parsedSchedule[current];
-                    schedule.Day = date;
-                    if (parsedSchedule[current + j].Contains("x") || parsedSchedule[current + j].Contains("wypł") || parsedSchedule[current + j].Equals("0"))
-                    {
-                        schedule.Tracks = parsedSchedule[current + j].Split(',', 'i').Select(x => x.Trim().Replace("m", string.Empty).Replace("wypł", "shallow")).ToList();
+                        next = hours[i + 1];
+                        if ((next - current - 1) < 7)
+                        {
+                            iterations = next - current - 1;
+                        }
                     }
                     else
                     {
-                        var aaa = 1;
+                        iterations = (parsedSchedule.Count - current) - 1;
                     }
-                    date = date.AddDays(1);
+
+
+                    for (int j = 1; j <= iterations; j++)
+                    {
+                        Schedule schedule = new Schedule();
+                        schedule.PoolId = pool.ShortName;
+                        scheduleList.Add(schedule);
+                        schedule.StartTime = parsedSchedule[current];
+                        schedule.Day = date;
+                        if (parsedSchedule[current + j].Contains("x") || parsedSchedule[current + j].Contains("wypł") || parsedSchedule[current + j].Equals("0"))
+                        {
+                            schedule.Tracks = parsedSchedule[current + j].Split(',', 'i').Select(x => x.Trim().Replace("m", string.Empty).Replace("wypł", "shallow")).ToList();
+                        }
+                        date = date.AddDays(1);
+                    }
                 }
+
+                var mergedSchedules = MergeSchedule(scheduleList);
+
+                await dc.Schedules.AddRangeAsync(mergedSchedules);
+                await dc.SaveChangesAsync();
             }
-
-            var mergedSchedules = MergeSchedule(scheduleList);
-            try
-            {
-
-                using (PoolsContext dc = this.services.GetService(typeof(PoolsContext)) as PoolsContext)
-                {
-                    await dc.Schedules.AddRangeAsync(mergedSchedules);
-                    await dc.SaveChangesAsync();
-                }
-
-            }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
+            }
+            finally
+            {
+                dc.Dispose();
             }
             return true;
         }
 
-        string endOfDay = string.Empty;
         private List<int> LoadHours(List<string> parsedSchedule)
         {
-            string lastHour = "00:00";
             List<int> hours = new List<int>();
             for (int i = 0; i < parsedSchedule.Count(); i++)
             {
@@ -168,14 +169,9 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
                 if (IsValidTimeFormat(time))
                 {
-                    if (TimeSpan.Parse(time) > TimeSpan.Parse(lastHour))
-                    {
-                        lastHour = time;
-                    }
                     hours.Add(i);
                 }
             }
-            endOfDay = lastHour;
             return hours;
         }
 
@@ -202,12 +198,12 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
                     if (mergedSchedule.Day != schedule.Day || !mergedSchedule.Tracks.SequenceEqual(schedule.Tracks))
                     {
-                        mergedSchedule = new Schedule() { Day = schedule.Day, StartTime = schedule.StartTime, Tracks = new List<string>(schedule.Tracks), Pool = schedule.Pool };
+                        mergedSchedule = new Schedule() { Day = schedule.Day, StartTime = schedule.StartTime, Tracks = new List<string>(schedule.Tracks), PoolId = schedule.PoolId };
                     }
                 }
                 else
                 {
-                    mergedSchedule = new Schedule() { Day = schedule.Day, StartTime = schedule.StartTime, Tracks = new List<string>(schedule.Tracks), Pool = schedule.Pool };
+                    mergedSchedule = new Schedule() { Day = schedule.Day, StartTime = schedule.StartTime, Tracks = new List<string>(schedule.Tracks), PoolId = schedule.PoolId };
                 }
             }
 

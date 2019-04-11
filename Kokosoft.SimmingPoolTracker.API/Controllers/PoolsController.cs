@@ -34,7 +34,7 @@ namespace Kokosoft.SimmingPoolTracker.API.Controllers
                 if (HttpContext.Request.Query.ContainsKey("time"))
                 {
                     //for now we omit the {pool} parameter
-                     occupancy = await repo.GetOccupancy(date, time);
+                    occupancy = await repo.GetOccupancy(date, time);
                 }
                 else
                 {
@@ -66,13 +66,28 @@ namespace Kokosoft.SimmingPoolTracker.API.Controllers
             return BadRequest();
         }
 
-        // GET api/pools
-        [HttpGet]
-        public ActionResult<string> GetPools()
+        // GET api/pools/olimpijczyk
+        [HttpGet("{pool}")]
+        public async Task<ActionResult<Pool>> GetPool([FromRoute]string pool)
         {
             try
             {
-                return "olimpijczyk";
+                return await repo.GetPool(pool);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"Error during getting pool {pool}.", ex);
+            }
+            return BadRequest();
+        }
+
+        // GET api/pools
+        [HttpGet]
+        public async Task<ActionResult<List<Pool>>> GetPools()
+        {
+            try
+            {
+                return await repo.GetPools();
             }
             catch (Exception ex)
             {

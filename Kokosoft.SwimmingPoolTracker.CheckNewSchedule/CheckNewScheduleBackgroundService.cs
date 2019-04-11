@@ -150,7 +150,7 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
             logger.LogInformation($"{loggerInformation}. Id: {poolSchedule.Id}");
             var message = new NewSchedule
             {
-                Pool = Pools.Olimpijczyk,
+                Pool = Pools.olimpijczyk,
                 Id = poolSchedule.Id,
                 Link = poolSchedule.Link,
                 ModificationDate = poolSchedule.ModificationDate,

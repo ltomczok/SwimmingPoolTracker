@@ -12,6 +12,8 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule.Model
         public string StartTime { get; set; }
         public string EndTime { get; set; }
         public List<string> Tracks { get; set; }
+
+        public string PoolId { get; set; }
         public Pool Pool { get; set; }
 
         public Schedule()
