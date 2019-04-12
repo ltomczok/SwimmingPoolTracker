@@ -20,7 +20,6 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 {
     public class OnNewSchedule : IHostedService
     {
-        string endOfDay = string.Empty;
         IBus messageBus;
         private readonly ILogger<OnNewSchedule> logger;
         private readonly MongoClient mongoClient;
@@ -36,7 +35,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
+             messageBus.Receive<NewSchedule>("swimmingpooltracker", message => OnNewMessage(message));
             return Task.CompletedTask;
         }
 
@@ -98,7 +97,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             {
                 dc = this.services.GetService(typeof(PoolsContext)) as PoolsContext;
                 Pool pool = await dc.SwimmingPools.Where(p => p.ShortName == newSchedule.Pool.ToString()).SingleOrDefaultAsync();
-                endOfDay = pool.ExitTime;
+                string exitTime = pool.ExitTime;
 
                 List<Schedule> scheduleList = new List<Schedule>();
                 DateTime startDate = new DateTime(newSchedule.YearFrom, newSchedule.MonthFrom, newSchedule.DayFrom);
@@ -144,7 +143,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     }
                 }
 
-                var mergedSchedules = MergeSchedule(scheduleList);
+                var mergedSchedules = MergeSchedule(scheduleList, exitTime);
 
                 await dc.Schedules.AddRangeAsync(mergedSchedules);
                 await dc.SaveChangesAsync();
@@ -175,7 +174,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             return hours;
         }
 
-        private List<Schedule> MergeSchedule(List<Schedule> poolSchedule)
+        private List<Schedule> MergeSchedule(List<Schedule> poolSchedule, string exitTime)
         {
             List<Schedule> mergedSchedules = new List<Schedule>();
             poolSchedule.RemoveAll(c => c.IsEmpty);
@@ -193,7 +192,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
 
                     if (TimeSpan.Parse(mergedSchedule.EndTime) < TimeSpan.Parse(mergedSchedule.StartTime))
                     {
-                        mergedSchedule.EndTime = endOfDay;
+                        mergedSchedule.EndTime = exitTime;
                     }
 
                     if (mergedSchedule.Day != schedule.Day || !mergedSchedule.Tracks.SequenceEqual(schedule.Tracks))
@@ -207,9 +206,9 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                 }
             }
 
-            if (TimeSpan.Parse(mergedSchedules.Last().EndTime) < TimeSpan.Parse(endOfDay))
+            if (TimeSpan.Parse(mergedSchedules.Last().EndTime) < TimeSpan.Parse(exitTime))
             {
-                mergedSchedules.Last().EndTime = endOfDay;
+                mergedSchedules.Last().EndTime = exitTime;
             }
 
             return mergedSchedules;
