@@ -1,4 +1,3 @@
-using Kokosoft.SimmingPoolTracker.API.Model;
 using Kokosoft.SimmingPoolTracker.API.Model.Dto;
 using Kokosoft.SimmingPoolTracker.API.Repository;
 using Microsoft.AspNetCore.Http;

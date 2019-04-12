@@ -4,15 +4,17 @@ using System.Collections.Generic;
 using Kokosoft.SimmingPoolTracker.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Kokosoft.SimmingPoolTracker.API.Migrations
 {
     [DbContext(typeof(PoolsContext))]
-    partial class PoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190412073115_pool_trackscount")]
+    partial class pool_trackscount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -25,12 +27,6 @@ namespace Kokosoft.SimmingPoolTracker.API.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("City");
-
-                    b.Property<string>("Street");
-
-                    b.Property<string>("ZipCode");
-
                     b.HasKey("Id");
 
                     b.ToTable("Address");
@@ -41,7 +37,7 @@ namespace Kokosoft.SimmingPoolTracker.API.Migrations
                     b.Property<string>("ShortName")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("AddressId");
+                    b.Property<int?>("AddressId");
 
                     b.Property<string>("CloseTime");
 
@@ -95,8 +91,7 @@ namespace Kokosoft.SimmingPoolTracker.API.Migrations
                 {
                     b.HasOne("Kokosoft.SimmingPoolTracker.API.Model.Address", "Address")
                         .WithMany()
-                        .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("AddressId");
                 });
 
             modelBuilder.Entity("Kokosoft.SimmingPoolTracker.API.Model.Schedule", b =>

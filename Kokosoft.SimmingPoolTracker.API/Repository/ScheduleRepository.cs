@@ -17,14 +17,47 @@ namespace Kokosoft.SimmingPoolTracker.API.Repository
             this.dc = dc;
         }
 
-        public async Task<List<Pool>> GetPools()
+        public async Task<List<Model.Dto.Pool>> GetPools()
         {
-            return await dc.SwimmingPools.ToListAsync();
+            List<Model.Dto.Pool> databasePools = await dc.SwimmingPools.Include(p => p.Address).Select(p => new Model.Dto.Pool()
+            {
+                ShortName = p.ShortName,
+                Name = p.Name,
+                OpenTime = p.OpenTime,
+                CloseTime = p.CloseTime,
+                ExitTime = p.ExitTime,
+                TracksCount = p.TracksCount,
+                Length = p.Length,
+                Width = p.Width,
+                Street = p.Address.Street,
+                City = p.Address.City,
+                ZipCode = p.Address.ZipCode
+            }).ToListAsync();
+
+            return databasePools;
         }
 
-        public async Task<Pool> GetPool(string poolId)
+        public async Task<Model.Dto.Pool> GetPool(string poolId)
         {
-            return await dc.SwimmingPools.Where(p => p.ShortName == poolId).SingleOrDefaultAsync();
+            Model.Dto.Pool pool = await dc.SwimmingPools
+                .Include(p => p.Address)
+                .Where(p => p.ShortName == poolId)
+                .Select(p => new Model.Dto.Pool()
+                {
+                    ShortName = p.ShortName,
+                    Name = p.Name,
+                    OpenTime = p.OpenTime,
+                    CloseTime = p.CloseTime,
+                    ExitTime = p.ExitTime,
+                    TracksCount = p.TracksCount,
+                    Length = p.Length,
+                    Width = p.Width,
+                    Street = p.Address.Street,
+                    City = p.Address.City,
+                    ZipCode = p.Address.ZipCode
+                })
+                .SingleOrDefaultAsync();
+            return pool;
         }
 
         public async Task<Occupancy> GetOccupancy(DateTime date)
