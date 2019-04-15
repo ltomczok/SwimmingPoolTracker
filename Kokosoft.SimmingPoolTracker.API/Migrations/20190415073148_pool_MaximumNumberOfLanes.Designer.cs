@@ -4,15 +4,17 @@ using System.Collections.Generic;
 using Kokosoft.SimmingPoolTracker.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Kokosoft.SimmingPoolTracker.API.Migrations
 {
     [DbContext(typeof(PoolsContext))]
-    partial class PoolsContextModelSnapshot : ModelSnapshot
+    [Migration("20190415073148_pool_MaximumNumberOfLanes")]
+    partial class pool_MaximumNumberOfLanes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

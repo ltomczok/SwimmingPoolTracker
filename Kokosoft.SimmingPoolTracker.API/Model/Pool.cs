@@ -12,7 +12,7 @@ namespace Kokosoft.SimmingPoolTracker.API.Model
         public string OpenTime { get; set; }
         public string CloseTime { get; set; }
         public string ExitTime { get; set; }
-        public int TracksCount { get; set; }
+        public int MaximumNumberOfLanes { get; set; }
         public int Width { get; set; }
         public int Length { get; set; }
         public int AddressId { get; set; }
