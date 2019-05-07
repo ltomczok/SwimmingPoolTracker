@@ -14,5 +14,21 @@ namespace Kokosoft.SwimmingPoolTracker.Core
         public int YearTo { get; set; }
         public string Link { get; set; }
         public DateTime ModificationDate { get; set; }
+
+        public DateTime StartDate
+        {
+            get
+            {
+                return new DateTime(this.YearFrom, this.MonthFrom, this.DayFrom);
+            }
+        }
+
+        public DateTime EndDate
+        {
+            get
+            {
+                return new DateTime(this.YearTo, this.MonthTo, this.DayTo);
+            }
+        }
     }
 }
