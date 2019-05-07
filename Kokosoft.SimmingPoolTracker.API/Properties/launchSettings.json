@@ -20,7 +20,7 @@
     "Kokosoft.SimmingPoolTracker.API": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/5/pool/schedule",
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
