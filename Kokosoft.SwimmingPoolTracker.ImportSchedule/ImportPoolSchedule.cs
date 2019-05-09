@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
@@ -20,11 +21,14 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
         string message = string.Empty;
         private readonly ILogger<ImportPoolSchedule> logger;
         private readonly PoolsContext poolsContext;
+        private readonly DownloadFileService fileService;
+        private readonly IHttpClientFactory httpClientFactory;
 
-        public ImportPoolSchedule(ILogger<ImportPoolSchedule> logger, PoolsContext poolsContext)
+        public ImportPoolSchedule(ILogger<ImportPoolSchedule> logger, PoolsContext poolsContext, DownloadFileService fileService)
         {
             this.logger = logger;
             this.poolsContext = poolsContext;
+            this.fileService = fileService;
         }
 
         public async Task ImportSchedule(string poolName, DateTime startDate, DateTime endDate, string filePath)
@@ -207,39 +211,13 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
             {
                 return false;
             }
-            TimeSpan dummyOutput;
-            return TimeSpan.TryParse(input, out dummyOutput);
+            DateTime dummyOutput;
+            return DateTime.TryParse(input, out dummyOutput);
         }
 
         public async Task<bool> DownloadFile(string remoteFile, string localFileName)
         {
-            logger.LogInformation($"Start downloading the file {remoteFile}.");
-            bool fileDownloaded = true;
-            HttpClient httpClient = null;
-            HttpResponseMessage httpResponseMessage = null;
-            try
-            {
-                httpClient = new HttpClient();
-                httpResponseMessage = await httpClient.GetAsync(remoteFile);
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    Stream contentStream = await httpResponseMessage.Content.ReadAsStreamAsync();
-                    FileStream fileStream = new FileStream(localFileName, FileMode.Create);
-                    await contentStream.CopyToAsync(fileStream);
-                    fileStream.Close();
-                }
-                return fileDownloaded;
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, $"Error during {remoteFile} file download.");
-            }
-            finally
-            {
-                httpResponseMessage.Dispose();
-                httpClient.Dispose();
-            }
-            return fileDownloaded;
+            return await fileService.DownloadFile(remoteFile, localFileName);
         }
     }
 }

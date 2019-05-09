@@ -48,6 +48,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     services.AddDbContext<PoolsContext>(opt => opt.UseNpgsql(hostContext.Configuration.GetConnectionString("PoolsContext")), ServiceLifetime.Transient);
                     services.AddSingleton<IBus>(f => RabbitHutch.CreateBus(hostContext.Configuration.GetSection("RabbitMQ")["Host"]));
                     services.AddSingleton(new MongoClient(hostContext.Configuration.GetSection("MongoDB")["Host"]));
+                    services.AddHttpClient<DownloadFileService>();
                     services.AddTransient<IImportPoolSchedule, ImportPoolSchedule>();
                     services.AddSingleton<IHostedService, OnNewSchedule>();
                 })

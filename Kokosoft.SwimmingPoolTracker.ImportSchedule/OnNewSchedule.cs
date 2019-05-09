@@ -42,7 +42,7 @@ namespace Kokosoft.SwimmingPoolTracker.ImportSchedule
                     scope.ServiceProvider
                         .GetRequiredService<IImportPoolSchedule>();
 
-                await importScheduleService.ImportSchedule(newSchedule.Pool.ToString(), newSchedule.StartDate, newSchedule.EndDate, newSchedule.Link);                
+                await importScheduleService.ImportSchedule(newSchedule.Pool.ToString(), newSchedule.StartDate, newSchedule.EndDate, newSchedule.Link);
             }
         }
     }
