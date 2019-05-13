@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{DC1E44E1
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImportScheduleTests", "ImportScheduleTests\ImportScheduleTests.csproj", "{B758FDC5-BFC1-4575-BA08-3A7B364689FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckNewScheduleTests", "CheckNewScheduleTests\CheckNewScheduleTests.csproj", "{3BCED41B-F9A3-42EA-B0AC-B7B36247B47B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{B758FDC5-BFC1-4575-BA08-3A7B364689FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B758FDC5-BFC1-4575-BA08-3A7B364689FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B758FDC5-BFC1-4575-BA08-3A7B364689FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BCED41B-F9A3-42EA-B0AC-B7B36247B47B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BCED41B-F9A3-42EA-B0AC-B7B36247B47B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BCED41B-F9A3-42EA-B0AC-B7B36247B47B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BCED41B-F9A3-42EA-B0AC-B7B36247B47B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -54,6 +60,7 @@ Global
 		{E83EE070-1C94-4CE0-8456-D8FB51E8CF5D} = {2F36700C-E2F9-40E3-B1CF-01A98DEC828A}
 		{F2C84E2E-1B35-459E-94AA-C1BC9822FC4B} = {2F36700C-E2F9-40E3-B1CF-01A98DEC828A}
 		{B758FDC5-BFC1-4575-BA08-3A7B364689FD} = {DC1E44E1-46B4-4157-9824-E6FC5B27B48E}
+		{3BCED41B-F9A3-42EA-B0AC-B7B36247B47B} = {DC1E44E1-46B4-4157-9824-E6FC5B27B48E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5E480F9F-35F3-4DFE-9EA5-C68810C8A1D5}

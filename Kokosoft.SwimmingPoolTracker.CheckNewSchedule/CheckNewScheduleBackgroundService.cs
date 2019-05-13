@@ -165,7 +165,7 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
             await messageBus.SendAsync<NewSchedule>("swimmingpooltracker", message);
         }
 
-        private void GetValuesFromDateString(string dateString, PoolSchedule poolSchedule, DateType dateType)
+        public void GetValuesFromDateString(string dateString, PoolSchedule poolSchedule, DateType dateType)
         {
             Type type = poolSchedule.GetType();
             string dateTypeString = dateType.ToString();
@@ -192,11 +192,10 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
                 }
                 iteration++;
             }
-
         }
     }
 
-    enum DateType
+    public enum DateType
     {
         From,
         To
