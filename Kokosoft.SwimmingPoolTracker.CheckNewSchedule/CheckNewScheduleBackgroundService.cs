@@ -25,6 +25,7 @@ namespace Kokosoft.SwimmingPoolTracker.CheckNewSchedule
         private readonly ILogger<CheckNewScheduleBackgroundService> logger;
         private readonly IBus messageBus;
         private readonly IApplicationLifetime app;
+
         public CheckNewScheduleBackgroundService(IMonthHelpers monthHelper, MongoClient mongoClient, ILogger<CheckNewScheduleBackgroundService> logger, IBus messageBus, IApplicationLifetime app)
         {
             this.monthHelper = monthHelper;
